@@ -1,6 +1,6 @@
 {
   "name": "hooxus",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "plightfield",
   "description": "State manage tools with react hooks",
   "license": "MIT",
