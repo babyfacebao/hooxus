@@ -1,4 +1,11 @@
-import { useState, Dispatch, SetStateAction, Reducer, useReducer } from "react";
+import {
+  useState,
+  Dispatch,
+  SetStateAction,
+  Reducer,
+  useReducer,
+  useMemo
+} from "react";
 
 export type ActionDispatch = (type: string, payload?: any) => void;
 
@@ -53,25 +60,13 @@ export function useStore<T>(store: Store<T>, log = false): StoreHook<T> {
   ) => {
     const { commitType, payload } = action;
 
-    const getAction = actions?.[commitType];
+    const getAction = actions?.[commitType.toString()];
     if (!getAction) {
-      console.error(`action ${commitType} not founded`);
+      console.error(`action ${commitType.toString()} not founded`);
       return state;
     }
 
-    if (log) {
-      console.log(`commit action: ${commitType} at ${new Date()}`);
-      console.log("---------");
-      console.dir(state);
-      console.log("to:");
-    }
-
     const newState = getAction?.(state, payload) || state;
-
-    if (log) {
-      console.dir(newState);
-      console.log("----------");
-    }
 
     // TODO: add deepClone difference to handle object change
     return newState;
@@ -87,17 +82,20 @@ export function useStore<T>(store: Store<T>, log = false): StoreHook<T> {
 
   // vuex style of asynchronous action dispatch
   const dispatch: AsyncActionDispatch = async (type, payload = null) => {
-    const getAsyncAction = asyncActions?.[type];
+    const getAsyncAction = asyncActions?.[type.toString()];
     if (!getAsyncAction) {
-      console.error(`async action ${type} not founded`);
+      console.error(`async action ${type.toString()} not founded`);
       return;
-    }
-
-    if (log) {
-      console.log(`dispatch async action: ${type} at ${new Date()}`);
     }
     return await getAsyncAction?.({ state: _state, commit }, payload);
   };
+
+  if (log) {
+    useMemo(() => {
+      console.log(new Date().toLocaleString());
+      console.dir(_state);
+    }, [_state]);
+  }
 
   return { state: _state, commit, dispatch };
 }
@@ -126,10 +124,17 @@ export function useToken<T>(defaultValue: T) {
  */
 export function useProvider<T>(
   provider$: StateHook<T> | undefined,
-  defaultValue: T
+  defaultValue: T,
+  log = false
 ): StateHook<T> {
   const local$ = useState<T>(defaultValue);
   const [value, setValue] = local$;
+  if (log) {
+    useMemo(() => {
+      console.log(new Date().toLocaleString());
+      console.dir(value);
+    }, [value]);
+  }
   return provider$ || { value, setValue };
 }
 
@@ -147,6 +152,6 @@ export function useStoreProvider<T>(
   initStore: Store<T>,
   log = false
 ): StoreHook<T> {
-  const local$ = useStore(initStore,log);
+  const local$ = useStore(initStore, log);
   return provider$ || local$;
 }

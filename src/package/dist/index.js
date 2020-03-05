@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { useState, useReducer } from "react";
+import { useState, useReducer, useMemo } from "react";
 /**
  * vuex like store management
  *
@@ -48,23 +48,14 @@ export function useStore(store, log) {
     if (log === void 0) { log = false; }
     var state = store.state, actions = store.actions, asyncActions = store.asyncActions;
     var reducer = function (state, action) {
+        var _a, _b;
         var commitType = action.commitType, payload = action.payload;
-        var getAction = actions === null || actions === void 0 ? void 0 : actions[commitType];
+        var getAction = (_a = actions) === null || _a === void 0 ? void 0 : _a[commitType.toString()];
         if (!getAction) {
-            console.error("action " + commitType + " not founded");
+            console.error("action " + commitType.toString() + " not founded");
             return state;
         }
-        if (log) {
-            console.log("commit action: " + commitType + " at " + new Date());
-            console.log("---------");
-            console.dir(state);
-            console.log("to:");
-        }
-        var newState = (getAction === null || getAction === void 0 ? void 0 : getAction(state, payload)) || state;
-        if (log) {
-            console.dir(newState);
-            console.log("----------");
-        }
+        var newState = ((_b = getAction) === null || _b === void 0 ? void 0 : _b(state, payload)) || state;
         // TODO: add deepClone difference to handle object change
         return newState;
     };
@@ -80,23 +71,27 @@ export function useStore(store, log) {
         if (payload === void 0) { payload = null; }
         return __awaiter(_this, void 0, void 0, function () {
             var getAsyncAction;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        getAsyncAction = asyncActions === null || asyncActions === void 0 ? void 0 : asyncActions[type];
+                        getAsyncAction = (_a = asyncActions) === null || _a === void 0 ? void 0 : _a[type.toString()];
                         if (!getAsyncAction) {
-                            console.error("async action " + type + " not founded");
+                            console.error("async action " + type.toString() + " not founded");
                             return [2 /*return*/];
                         }
-                        if (log) {
-                            console.log("dispatch async action: " + type + " at " + new Date());
-                        }
-                        return [4 /*yield*/, (getAsyncAction === null || getAsyncAction === void 0 ? void 0 : getAsyncAction({ state: _state, commit: commit }, payload))];
-                    case 1: return [2 /*return*/, _a.sent()];
+                        return [4 /*yield*/, ((_b = getAsyncAction) === null || _b === void 0 ? void 0 : _b({ state: _state, commit: commit }, payload))];
+                    case 1: return [2 /*return*/, _c.sent()];
                 }
             });
         });
     };
+    if (log) {
+        useMemo(function () {
+            console.log(new Date().toLocaleString());
+            console.dir(_state);
+        }, [_state]);
+    }
     return { state: _state, commit: commit, dispatch: dispatch };
 }
 /**
@@ -120,9 +115,16 @@ export function useToken(defaultValue) {
  * @param {T} defaultValue
  * @returns
  */
-export function useProvider(provider$, defaultValue) {
+export function useProvider(provider$, defaultValue, log) {
+    if (log === void 0) { log = false; }
     var local$ = useState(defaultValue);
     var value = local$[0], setValue = local$[1];
+    if (log) {
+        useMemo(function () {
+            console.log(new Date().toLocaleString());
+            console.dir(value);
+        }, [value]);
+    }
     return provider$ || { value: value, setValue: setValue };
 }
 /**

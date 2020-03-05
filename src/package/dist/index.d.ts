@@ -59,7 +59,7 @@ export declare function useToken<T>(defaultValue: T): {
  * @param {T} defaultValue
  * @returns
  */
-export declare function useProvider<T>(provider$: StateHook<T> | undefined, defaultValue: T): StateHook<T>;
+export declare function useProvider<T>(provider$: StateHook<T> | undefined, defaultValue: T, log?: boolean): StateHook<T>;
 /**
  * define a storeHook whether or not the provider:storeHook provided
  *
