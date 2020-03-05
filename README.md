@@ -1,44 +1,108 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Hooxus — State manage tools with react hooks
 
-## Available Scripts
+🤣🤣🤣
 
-In the project directory, you can run:
+Easily using state or reduce hook, considering dependencies management by just — 
 
-### `yarn start`
+## Two functions! 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+the main took functions are:
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## useProvider
 
-### `yarn test`
+```typescript
+const value$ = useProvider(undefined, ""); 
+// if there is no other dependencies
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+const valueFromProps$ = useProvider(props.value$, "")
+// if there is dependency from props
 
-### `yarn build`
+const vlaueFromContext$ = useProvider(useContext(Context),"")
+// if there is dependency from context
+// use in the children components
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The consequence of this api is:
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+**Component will look for the state hook in props or context, otherwise using the state hook locally.**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**Once the firs param was undefined, it will create a new state hook.**
 
-### `yarn eject`
+And the output of this api function is in this form:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```typescript
+{value,setValue}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Rather than array form, so you can use it like this:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```html
+<span>{value$.value}</span>
+<button onClick={()=>value$.setValue('new value')}>functionality</button>
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+That type of methods will keep **robustness** of functional component, you can just develop an independent component, despite there is no other dependencies developed.
 
-## Learn More
+> ! Using XXX$ like nomination to specify that this variable is a reactive StateHook
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## useStoreProvider
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```typescript
+// declaration
+const store_$ = useStoreProvider(undefined, {
+    state: { value: 0 },
+    actions: {
+      addValue(state, payload: number) {
+        return { value: state.value + payload };
+      }
+    },
+    asyncActions: {
+      async addValueLater(ctx, payload) {
+        await wait(1000);
+        ctx.commit("addValue", payload);
+      }
+    }
+  });
+
+// using
+store_$.value
+store_$.commit('action',1)
+store_$.dispatch('async action',1)
+```
+
+Inspired by the flux like store management — vuex.
+
+### commit
+
+"Dispatch" an action — in the actions of declaration — that directly change the state.
+
+### dispatch
+
+"Dispatch" an async function — in the asyncActions of declaration — then in that function "dispatch" a direct changing.
+
+> ! You'd better declare a store in other independent file, in case of circular reference.
+>
+> ! Using XXX_$ like nomination to specify that this variable is a StoreHook
+
+----
+
+Just use that two function with other state transformation function:
+
+`useEffect`，`useMemo`,` useLayoutEffect`
+
+And ref hook：
+
+`useRef`
+
+Can easily change the world!
+
+Never forget to listen the value of provider:
+
+```typescript
+useEffect(()=>{
+//...
+},[value$.value,store_$.value])
+```
+
+# 😃 Happy Hacking!
+
