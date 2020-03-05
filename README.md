@@ -65,7 +65,7 @@ const store_$ = useStoreProvider(undefined, {
   });
 
 // using
-store_$.value
+store_$.state
 store_$.commit('action',1)
 store_$.dispatch('async action',1)
 ```
@@ -101,7 +101,7 @@ Never forget to listen the value of provider:
 ```typescript
 useEffect(()=>{
 //...
-},[value$.value,store_$.value])
+},[value$.value,store_$.state])
 ```
 
 # 😃 Happy Hacking!
